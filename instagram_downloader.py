@@ -33,7 +33,7 @@ print('Successfully Logged in to profile:' , USER ,'!')
 def start(message):
     f_read = open("podpis.txt","r")
     f1 = f_read.readlines()
-    if (message.chat.id)+'\n' in f1:
+    if str(message.chat.id)+'\n' in f1:
         pass
     else:
         f = open("podpis.txt","a+")
