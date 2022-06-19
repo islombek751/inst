@@ -11,6 +11,7 @@ from tqdm import tqdm
 import logging
 import time
 API_TOKEN = '5528813146:AAHtgSpySLIp-8Av6LNGQpnVx4iLvs3-Yu4'
+import instaloader
 
 bot = telebot.TeleBot(API_TOKEN)
 
@@ -51,7 +52,6 @@ def index():
     # Set webhook
     bot.set_webhook(url=WEBHOOK_HOST + WEBHOOK_URL_PATH,
                 )
-    import instaloader
 
     L = instaloader.Instaloader()
 
