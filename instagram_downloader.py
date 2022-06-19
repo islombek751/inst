@@ -3,16 +3,60 @@ import requests
 import re
 import time
 import telebot
-
+import flask
 import glob
 import os
-from instabot import Bot
 from pathlib import Path
 from tqdm import tqdm
+import logging
+import time
+API_TOKEN = '5528813146:AAHtgSpySLIp-8Av6LNGQpnVx4iLvs3-Yu4'
 
-token = '5528813146:AAHtgSpySLIp-8Av6LNGQpnVx4iLvs3-Yu4'
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot(API_TOKEN)
 
+
+WEBHOOK_HOST = 'instauzbek.herokuapp.com'
+WEBHOOK_PORT = 8443  # 443, 80, 88 or 8443 (port need to be 'open')
+WEBHOOK_LISTEN = '0.0.0.0'  # In some VPS you may need to put here the IP addr
+
+# WEBHOOK_SSL_CERT = './webhook_cert.pem'  # Path to the ssl certificate
+# WEBHOOK_SSL_PRIV = './webhook_pkey.pem'  # Path to the ssl private key
+
+# Quick'n'dirty SSL certificate generation:
+#
+# openssl genrsa -out webhook_pkey.pem 2048
+# openssl req -new -x509 -days 3650 -key webhook_pkey.pem -out webhook_cert.pem
+#
+# When asked for "Common Name (e.g. server FQDN or YOUR name)" you should reply
+# with the same value in you put in WEBHOOK_HOST
+
+WEBHOOK_URL_BASE = "https://%s:%s" % (WEBHOOK_HOST, WEBHOOK_PORT)
+WEBHOOK_URL_PATH = "/%s/" % (API_TOKEN)
+
+logger = telebot.logger
+telebot.logger.setLevel(logging.INFO)
+
+bot = telebot.TeleBot(API_TOKEN)
+
+app = flask.Flask(__name__)
+
+
+# Empty webserver index, return nothing, just http 200
+@app.route('/', methods=['GET', 'HEAD'])
+def index():
+    return ''
+
+
+# Process webhook calls
+@app.route(WEBHOOK_URL_PATH, methods=['POST'])
+def webhook():
+    if flask.request.headers.get('content-type') == 'application/json':
+        json_string = flask.request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return ''
+    else:
+        flask.abort(403)
 
 import instaloader
 
@@ -28,6 +72,8 @@ group_id = '-1001600708495'
 
 L.login(USER , PASSWORD)
 print('Successfully Logged in to profile:' , USER ,'!')
+
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -93,4 +139,16 @@ def linkto(message):
     else:
         bot.send_message(message.chat.id,'Send only Instagram links!')
         
-bot.infinity_polling()
+# Remove webhook, it fails sometimes the set if there is a previous webhook
+bot.remove_webhook()
+
+time.sleep(0.1)
+
+# Set webhook
+bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
+                )
+
+# Start flask server
+app.run(host=WEBHOOK_LISTEN,
+        port=WEBHOOK_PORT,
+        debug=True)
