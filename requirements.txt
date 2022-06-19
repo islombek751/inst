@@ -2,3 +2,5 @@ flask
 instaloader
 pytelegrambotapi
 gunicorn
+requests
+tqdm
