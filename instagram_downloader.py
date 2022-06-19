@@ -42,8 +42,19 @@ app = flask.Flask(__name__)
 
 
 # Empty webserver index, return nothing, just http 200
-@app.route('/', methods=['GET', 'HEAD'])
+@app.get('/')
 def index():
+    import instaloader
+
+    L = instaloader.Instaloader()
+
+
+    USER = "fastlogzapp"
+
+
+    PASSWORD = "asaka.uz1"
+    L.login(USER , PASSWORD)
+    print('Successfully Logged in to profile:' , USER ,'!')
     return ''
 
 
@@ -58,20 +69,11 @@ def webhook():
     else:
         flask.abort(403)
 
-import instaloader
 
-L = instaloader.Instaloader()
-
-
-USER = "fastlogzapp"
-
-
-PASSWORD = "asaka.uz1"
 
 group_id = '-1001600708495'
 
-L.login(USER , PASSWORD)
-print('Successfully Logged in to profile:' , USER ,'!')
+
 
 
 
@@ -145,7 +147,7 @@ bot.remove_webhook()
 time.sleep(0.1)
 
 # Set webhook
-bot.set_webhook(url=WEBHOOK_URL_BASE + WEBHOOK_URL_PATH,
+bot.set_webhook(url=WEBHOOK_HOST + WEBHOOK_URL_PATH,
                 )
 
 # Start flask server
