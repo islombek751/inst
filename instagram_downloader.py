@@ -41,6 +41,7 @@ bot = telebot.TeleBot(API_TOKEN)
 
 app = flask.Flask(__name__)
 
+L = instaloader.Instaloader()
 
 # Empty webserver index, return nothing, just http 200
 @app.get('/')
@@ -53,7 +54,6 @@ def index():
     bot.set_webhook(url=WEBHOOK_HOST + WEBHOOK_URL_PATH,
                 )
 
-    L = instaloader.Instaloader()
 
 
     USER = "fastlogzapp"
